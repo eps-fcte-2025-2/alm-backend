@@ -4,7 +4,7 @@ from .routers import items
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="FastAPI with PostgreSQL")
+app = FastAPI(title="ALM - XLSTM - Service")
 
 app.include_router(items.router, prefix="/items", tags=["items"])
 

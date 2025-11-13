@@ -6,10 +6,10 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/code/app
-      - ./tests:/code/tests
+      - .:/code
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/fastapi_db
+      - PYTHONPATH=/code
     depends_on:
       db:
         condition: service_healthy
