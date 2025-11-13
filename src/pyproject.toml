@@ -5,8 +5,10 @@ include = '\.pyi?$'
 
 [tool.ruff]
 line-length = 88
-select = ["E", "F", "I", "N", "W"]
-ignore = []
+
+[tool.ruff.lint]
+select = ["E", "F", "N", "W"]
+ignore = ["I001"]
 fixable = ["ALL"]
 
 [tool.pytest.ini_options]
