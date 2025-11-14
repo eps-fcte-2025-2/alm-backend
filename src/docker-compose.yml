@@ -1,28 +1,25 @@
-version: '3.8'
-
 services:
   web:
+    container_name: alm-backend
     build: .
     ports:
       - "8000:8000"
     volumes:
       - .:/code
+    env_file:
+      - .env.dev
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/fastapi_db
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       - PYTHONPATH=/code
     depends_on:
       db:
         condition: service_healthy
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   db:
+    container_name: ${POSTGRES_HOST}
     image: postgres:15-alpine
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=fastapi_db
-    ports:
-      - "5432:5432"
+    env_file:
+      .env.dev
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
