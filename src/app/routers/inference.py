@@ -47,7 +47,7 @@ async def submit_inference(model_name: str, file: Annotated[UploadFile, File()])
         curl -X POST "http://localhost:8000/api/v1/inference/petr_4_xlstm_embedding_128" \
              -F "file=@data.csv"
 
-    """
+    """  # noqa: E501
     try:
         # Validate model exists
         available_models = inference_service.list_available_models()
@@ -56,7 +56,7 @@ async def submit_inference(model_name: str, file: Annotated[UploadFile, File()])
         if model_name not in model_names:
             raise HTTPException(
                 status_code=404,
-                detail=f"Model '{model_name}' not found. Available models: {model_names}",
+                detail=f"Model '{model_name}' not found. Available models: {model_names}",  # noqa: E501
             )
 
         # Validate file type
@@ -77,7 +77,7 @@ async def submit_inference(model_name: str, file: Annotated[UploadFile, File()])
             job_id=job_id,
             status=JobStatus.PENDING,
             model=model_name,
-            message=f"CSV file '{file.filename}' uploaded and queued for processing. Use job_id to retrieve results.",
+            message=f"CSV file '{file.filename}' uploaded and queued for processing. Use job_id to retrieve results.",  # noqa: E501
         )
 
     except HTTPException:

@@ -169,7 +169,7 @@ class InferenceService:
         seq_length = 20  # Default from training
 
         if len(embeddings) < seq_length:
-            msg = f"Not enough data points. Need at least {seq_length}, got {len(embeddings)}"
+            msg = f"Not enough data points. Need at least {seq_length}, got {len(embeddings)}"  # noqa: E501
             raise ValueError(
                 msg,
             )
