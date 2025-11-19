@@ -1,9 +1,9 @@
 import asyncio
+import contextlib
 import io
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -18,65 +18,63 @@ from app.schemas.inference import (
 
 
 class InferenceJob:
-    """Represents a single inference job"""
+    """Represents a single inference job."""
 
-    def __init__(self, job_id: str, model: str, data: str):
+    def __init__(self, job_id: str, model: str, data: str) -> None:
         self.job_id = job_id
         self.model = model
         self.data = data
         self.status = JobStatus.PENDING
         self.submitted_at = datetime.utcnow()
-        self.completed_at: Optional[datetime] = None
-        self.result: Optional[PredictionResult] = None
-        self.error: Optional[str] = None
+        self.completed_at: datetime | None = None
+        self.result: PredictionResult | None = None
+        self.error: str | None = None
 
 
 class InferenceService:
-    """Service for managing inference operations"""
+    """Service for managing inference operations."""
 
-    def __init__(self, models_dir: str = "models"):
+    def __init__(self, models_dir: str = "models") -> None:
         self.models_dir = Path(models_dir)
         self.models_dir.mkdir(exist_ok=True)
 
         # In-memory job storage (use Redis/DB in production)
-        self.jobs: Dict[str, InferenceJob] = {}
+        self.jobs: dict[str, InferenceJob] = {}
 
         # Queue for pending jobs
         self.job_queue: asyncio.Queue = asyncio.Queue()
 
         # Loaded models cache
-        self.loaded_models: Dict[str, tuple] = {}
+        self.loaded_models: dict[str, tuple] = {}
 
         # Device configuration
         self.device = self._get_device()
 
         # Start background worker
-        self.worker_task: Optional[asyncio.Task] = None
+        self.worker_task: asyncio.Task | None = None
 
     def _get_device(self) -> torch.device:
-        """Get the best available device"""
+        """Get the best available device."""
         if torch.cuda.is_available():
             return torch.device("cuda")
-        elif torch.backends.mps.is_available():
+        if torch.backends.mps.is_available():
             return torch.device("mps")
         return torch.device("cpu")
 
-    async def start_worker(self):
-        """Start the background worker"""
+    async def start_worker(self) -> None:
+        """Start the background worker."""
         if self.worker_task is None or self.worker_task.done():
             self.worker_task = asyncio.create_task(self._process_queue())
 
-    async def stop_worker(self):
-        """Stop the background worker"""
+    async def stop_worker(self) -> None:
+        """Stop the background worker."""
         if self.worker_task and not self.worker_task.done():
             self.worker_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self.worker_task
-            except asyncio.CancelledError:
-                pass
 
-    def list_available_models(self) -> List[ModelInfo]:
-        """List all available models in the models directory"""
+    def list_available_models(self) -> list[ModelInfo]:
+        """List all available models in the models directory."""
         models = []
         for model_path in self.models_dir.glob("*.pt"):
             try:
@@ -97,13 +95,14 @@ class InferenceService:
         return models
 
     def _load_model(self, model_name: str):
-        """Load a model from disk"""
+        """Load a model from disk."""
         if model_name in self.loaded_models:
             return self.loaded_models[model_name]
 
         model_path = self.models_dir / f"{model_name}.pt"
         if not model_path.exists():
-            raise FileNotFoundError(f"Model not found: {model_name}")
+            msg = f"Model not found: {model_name}"
+            raise FileNotFoundError(msg)
 
         # Import xLSTM from submodule
         import sys
@@ -134,7 +133,7 @@ class InferenceService:
         return model, config
 
     def _parse_csv_data(self, csv_data: str) -> tuple:
-        """Parse CSV data into embeddings and prices"""
+        """Parse CSV data into embeddings and prices."""
         df = pd.read_csv(io.StringIO(csv_data))
 
         embeddings = []
@@ -151,13 +150,13 @@ class InferenceService:
                 prices.append(row["last_price"])
 
         return np.array(embeddings, dtype=np.float32), np.array(
-            prices, dtype=np.float32
+            prices, dtype=np.float32,
         )
 
     def _run_inference(
-        self, model, config, embeddings: np.ndarray, prices: np.ndarray
+        self, model, config, embeddings: np.ndarray, prices: np.ndarray,
     ) -> PredictionResult:
-        """Run inference on the provided data"""
+        """Run inference on the provided data."""
         prediction_horizon = config.get("prediction_horizon", 1)
 
         # Use the last sequence for prediction
@@ -165,8 +164,9 @@ class InferenceService:
         seq_length = 20  # Default from training
 
         if len(embeddings) < seq_length:
+            msg = f"Not enough data points. Need at least {seq_length}, got {len(embeddings)}"
             raise ValueError(
-                f"Not enough data points. Need at least {seq_length}, got {len(embeddings)}"
+                msg,
             )
 
         # Take the last seq_length embeddings
@@ -197,7 +197,7 @@ class InferenceService:
         )
 
     async def submit_job(self, model: str, data: str) -> str:
-        """Submit a new inference job"""
+        """Submit a new inference job."""
         job_id = str(uuid.uuid4())
         job = InferenceJob(job_id=job_id, model=model, data=data)
 
@@ -207,9 +207,10 @@ class InferenceService:
         return job_id
 
     async def get_job_result(self, job_id: str) -> InferenceResultResponse:
-        """Get the result of a job"""
+        """Get the result of a job."""
         if job_id not in self.jobs:
-            raise ValueError(f"Job not found: {job_id}")
+            msg = f"Job not found: {job_id}"
+            raise ValueError(msg)
 
         job = self.jobs[job_id]
 
@@ -223,8 +224,8 @@ class InferenceService:
             error=job.error,
         )
 
-    async def _process_queue(self):
-        """Background worker to process jobs from the queue"""
+    async def _process_queue(self) -> None:
+        """Background worker to process jobs from the queue."""
         while True:
             try:
                 job = await self.job_queue.get()

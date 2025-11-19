@@ -8,7 +8,7 @@ from .services.inference_service import inference_service
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifespan context manager for startup and shutdown events"""
+    """Lifespan context manager for startup and shutdown events."""
     # Startup
     await inference_service.start_worker()
     yield
