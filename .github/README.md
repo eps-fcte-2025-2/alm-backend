@@ -1,17 +1,8 @@
-# 🧠 ALM Platform Backend (API FastAPI)
+# Serviço Backend do Projeto ALM
 
-## 🎯 Visão Geral do Projeto
+## Visão Geral do Projeto
 
-O Backend da Plataforma ALM é o serviço central de análise de dados e Machine Learning.
-
-### Funções Principais:
-
-- **Ingestão de Dados**: Coleta de preços históricos e notícias financeiras.
-- **Modelagem**: Execução de modelos LSTM para previsão de tendências e FinBERT para análise de sentimento.
-- **Backtesting**: Simulação de estratégias de investimento e cálculo de métricas (Sharpe Ratio, Retorno Total).
-- **API REST**: Disponibilização de todos os dados, previsões e resultados de simulação via FastAPI.
-
-O objetivo é fornecer o motor de inteligência por trás do dashboard de gestão de ativos e passivos.
+O Backend da Plataforma ALM é o serviço central do projeto.
 
 ## 🚀 Como Rodar o Serviço Rapidamente (Docker)
 
