@@ -10,6 +10,8 @@ Para garantir que todos estejam trabalhando no mesmo ambiente, siga estes passos
     ```bash
     git clone alm-backend
     cd alm-backend
+
+    git submodule update --init --recursive
     ```
 
 2.  **Instale as Dependências:**
