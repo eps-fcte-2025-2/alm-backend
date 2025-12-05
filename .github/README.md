@@ -26,7 +26,7 @@ Serviço de inferência para Asset Liability Management (ALM) utilizando modelos
 
 ## Sobre o Projeto
 
-Este serviço fornece uma API REST para realizar inferências com modelos xLSTM treinados. O sistema processa arquivos CSV contendo embeddings de séries temporais financeiras e retorna previsões de preços futuros.
+Este serviço fornece uma API REST para realizar inferências com modelos xLSTM treinados. O treinamento de novos modelos deve ser feito através da biblioteca PyxLSTM que foi importada como submódulo desta API. O sistema processa arquivos CSV contendo embeddings de séries temporais financeiras e retorna previsões de preços futuros.
 
 ### Características Principais
 
@@ -142,7 +142,7 @@ Resposta esperada:
 {"status": "healthy"}
 ```
 
-## 🔌 Endpoints da API
+## Endpoints da API
 
 ### 1. Health Check
 
